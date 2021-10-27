@@ -17,6 +17,13 @@ class Containers(Namespace):
         except DockerException as ex:
             return format_error(ex)
 
+    def on_list_stats(self, sid):
+        try:
+            containers = docker.client.containers.list(all=True)
+            return {container.id: container.stats(stream=False) for container in containers}
+        except DockerException as ex:
+            return format_error(ex)
+
     def on_run(self, sid, image, _command=None):
         try:
             container = docker.client.containers.run(image, command=_command, detach=True)
