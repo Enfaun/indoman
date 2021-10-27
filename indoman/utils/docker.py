@@ -1,4 +1,5 @@
-from docker import DockerClient
+import eventlet
+docker  = eventlet.import_patched("docker")
 def init(*args, **kwargs):
     global client
-    client = DockerClient(*args, **kwargs)
+    client = docker.DockerClient(*args, **kwargs)
