@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+disable=missing-function-docstring,
+        missing-class-docstring,
+        missing-module-docstring,
+        logging-fstring-interpolation,
+        dangerous-default-value
+
+[VARIABLES]
+ignored-argument-names=_.*|^sid$

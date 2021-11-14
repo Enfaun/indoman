@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from logging import getLogger
 
 import eventlet
 from socketio import Server, WSGIApp
@@ -11,20 +10,36 @@ logging.init()
 docker.init()
 
 
-
+print(__name__)
 if __name__ == "__main__":
     parser = ArgumentParser(
         "indoman",
         description="Backend of Interactive Docker Manager"
         )
-    parser.add_argument("--docker-url", help="URL to the Docker server", type=str)
-    parser.add_argument("--docker-tls", help="Use TLS to connect to Docker server", action="store_true")
-    parser.add_argument("--disable-cors", help="Disable CORS check (ONLY FOR DEBUGGING!)", action="store_true")
-    parser.add_argument("--debug", help="Show debug log", action="store_true")
-    parser.add_argument("--socketio-debug", help="Show socketio debug log", action="store_true")
-    parser.add_argument("--host", help="Host to listen on", type=str, default="127.0.0.1")
-    parser.add_argument("--port", help="Port to listen on", type=int, default="4636")
-    args = parser.parse_args()    
+    parser.add_argument("--docker-url",
+                        help="URL to the Docker server",
+                        type=str)
+    parser.add_argument("--docker-tls",
+                        help="Use TLS to connect to Docker server",
+                        action="store_true")
+    parser.add_argument("--disable-cors",
+                        help="Disable CORS check (ONLY FOR DEBUGGING!)",
+                        action="store_true")
+    parser.add_argument("--debug",
+                        help="Show debug log",
+                        action="store_true")
+    parser.add_argument("--socketio-debug",
+                        help="Show socketio debug log",
+                        action="store_true")
+    parser.add_argument("--host",
+                        help="Host to listen on",
+                        type=str,
+                        default="127.0.0.1")
+    parser.add_argument("--port",
+                        help="Port to listen on",
+                        type=int,
+                        default="4636")
+    args = parser.parse_args()
     server_init_args =  {}
     if args.disable_cors:
         server_init_args.update({"cors_allowed_origins": "*"})
