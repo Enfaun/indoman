@@ -1,7 +1,7 @@
 from docker.errors import DockerException
 from socketio import Namespace
 
-from indoman.utils import docker, logging, format_error
+from indoman.utils import docker, logging, format_error, messages
 
 class Containers(Namespace):
     def on_connect(self, sid, environ):
@@ -26,8 +26,21 @@ class Containers(Namespace):
 
     def on_run(self, sid, image, _command=None):
         try:
-            container = docker.client.containers.run(image, command=_command, detach=True)
-            return container.attrs
+            ocker.client.containers.run(image, command=_command, detach=True)
+            return messages.SUCCESS
+        except DockerException as ex:
+            return format_error(ex)
+
+    def on_start(self, sid, container_id, start_params=None):
+        try:
+            docker.client.containers.get(container_id).start(**start_params)
+            return messages.SUCCESS
+        except DockerException as ex:
+            return format_error(ex)
+
+    def on_stop(self, sid, container_id, stop_params={}):
+        try:
+            docker.client.containers.get(container_id).stop(**stop_params)
         except DockerException as ex:
             return format_error(ex)
 
