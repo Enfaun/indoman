@@ -6,7 +6,7 @@ from zipfile import ZipFile, BadZipfile
 
 from socketio import Namespace
 
-from indoman.recipes import import_recipe, list_recipes, remove_recipe
+from indoman.recipes import import_recipe, get_recipe, list_recipes, remove_recipe
 from indoman.utils import docker, logging, format_error, errors, constants, messages
 
 
@@ -38,8 +38,11 @@ class Recipes(Namespace):
         finally:
             self.leave_room(sid, room)
 
-    def on_craft(self, sid, recipe, prefix, config):
+    def on_craft(self, sid, recipe, prefix, recipe_override):
         pass
+
+    def on_get_recipe(self, sid, name):
+        return get_recipe(name)
 
     def on_list(self, sid):
         return list_recipes()
