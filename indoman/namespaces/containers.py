@@ -42,7 +42,16 @@ class Containers(Namespace):
     def on_listen_logs(self, sid, container_id, log_params={}):
         try:
             container = docker.client.containers.get(container_id)
-            self.enter_room(sid, container.id)
-            self.emit("logs", container.logs(**log_params))
+            room = f"{sid}-{container.id}-log"
+            self.enter_room(sid, room)
+            stream = container.logs(stream=True, **log_params)
+            try:
+                while True:
+                    line = next(stream).decode("utf-8")
+                    self.emit("logs", line, room)
+                    if room not in self.rooms(sid):
+                        break
+            except StopIteration:
+                self.leave_room(sid, room)
         except DockerException as ex:
             return format_error(ex)
