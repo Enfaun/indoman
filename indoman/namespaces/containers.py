@@ -26,7 +26,7 @@ class Containers(Namespace):
 
     def on_run(self, sid, image, _command=None):
         try:
-            ocker.client.containers.run(image, command=_command, detach=True)
+            docker.client.containers.run(image, command=_command, detach=True)
             return messages.SUCCESS
         except DockerException as ex:
             return format_error(ex)

@@ -1,6 +1,9 @@
-from logging import basicConfig, getLogger
+from logging import basicConfig, getLogger, Logger
 
 from indoman import app_name
+
+
+logger: Logger
 
 def init():
     global logger

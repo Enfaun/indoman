@@ -1,6 +1,7 @@
 from json import load as json_load, JSONDecodeError
 from os import mkdir, listdir, removedirs
-from os.path import isdir, join as path_join, isfile
+from os.path import join as path_join, isfile
+from re import  compile as re_compile
 from shutil import move
 from zipfile import ZipFile
 
@@ -29,10 +30,14 @@ def parse_recipe(directory):
     recipefp = open(recipe)
     try:
         recipe_json = json_load(recipefp)
-        name = recipe_json["name"]
+        name_re = re_compile("[a-z_]+]")
+        name = recipe_json["canonical_id"]
+        if not name_re.match(name):
+            raise errors.INCORRECT_RECIPE_JSON_FORMAT
         new_recipe_path = path_join(constants.RECIPES_DIR, name)
         move(directory, new_recipe_path + "/")
     except (JSONDecodeError, KeyError):
+        removedirs(directory)
         raise errors.INCORRECT_RECIPE_JSON_FORMAT
     finally:
         recipefp.close()
