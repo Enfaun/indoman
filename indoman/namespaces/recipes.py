@@ -5,6 +5,7 @@ from shutil import move
 from traceback import format_exc
 from zipfile import ZipFile, BadZipfile
 
+from docker.errors import ImageNotFound
 from socketio import Namespace
 
 from indoman.recipes import import_recipe, get_recipe, list_recipes, remove_recipe
@@ -56,6 +57,14 @@ class Recipes(Namespace):
             network = craft_recipe.create_network(recipe_name, prefix)
             self.send(messages.CRAFT_NETWORK_CREATED, room)
             for container_recipe in recipe["containers"]:
+                image = container_recipe["from"]
+                try:
+                    docker.client.images.get(image)
+                except ImageNotFound:
+                    message = messages.CRAFT_PULLING_IMAGE
+                    message.update({"image": image})
+                    self.send(message, room)
+                    docker.client.images.pull(image)
                 env = environment_variables[container_recipe["name"]]
                 container = craft_recipe.create_container(container_recipe, recipe_name, prefix, variables, env)
                 created_containers.append(container)
