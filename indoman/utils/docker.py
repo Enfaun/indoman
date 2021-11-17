@@ -7,4 +7,4 @@ client: docker.DockerClient
 
 def init(*args, **kwargs):
     global client
-    client: docker.DockerClient = _docker.DockerClient(*args, **kwargs)
+    client = _docker.DockerClient(*args, **kwargs)
