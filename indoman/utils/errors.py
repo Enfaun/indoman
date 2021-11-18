@@ -9,9 +9,9 @@ def format_error(ex):
 
 
 class IndomanError(Exception):
-    def __init__(self, status_code, message):
+    def __init__(self, status_code, explanation):
         self.status_code = status_code
-        self.message = message
+        self.explanation = explanation
 
 
 BAD_ZIPFILE = IndomanError(400, "BAD_ZIPFILE")

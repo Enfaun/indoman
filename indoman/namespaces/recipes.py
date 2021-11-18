@@ -23,13 +23,14 @@ class Recipes(Namespace):
     def on_upload(self, sid, data):
         if not isdir(constants.RECIPES_DIR): mkdir(constants.RECIPES_DIR)
         logging.logger.info(f"{sid} uploading recipes...")
-        logging.logger.debug(type(sid))
-        zip_filename = f"recipes/tmp-{sid}.zip"
+        zip_filename = path_join(constants.TEMP_DIR, f"recipe-tmp-{sid}.zip")
         file = open(zip_filename, "wb")
         file.write(data)
+        file.close()
         room = zip_filename + "-room"
         self.enter_room(sid, room)
         try:
+            self.send(messages.RECIPE_UNPACKING, room)
             tmp_dir = import_recipe.unpack_zip(zip_filename)
             self.send(messages.RECIPE_EXTRACT_FINISHED, room)
             import_recipe.parse_recipe(tmp_dir)
@@ -88,8 +89,9 @@ class Recipes(Namespace):
     def on_get_recipe(self, sid, name):
         return get_recipe(name)
 
-    def on_list(self, sid):
-        return list_recipes()
+    def on_list(self, sid, glob="*"):
+        logging.logger.debug(f"Glob pattern: '{glob}'")
+        return list_recipes(glob)
 
     def on_delete(self, sid, name):
         remove_recipe(name)

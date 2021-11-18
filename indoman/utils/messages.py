@@ -3,6 +3,7 @@ def format_message(code, message):
 
 
 SUCCESS = format_message(200, "SUCCESS")
+RECIPE_UNPACKING = format_message(201, "RECIPE_UNPACKING")
 RECIPE_EXTRACT_FINISHED = format_message(200, "RECIPE_EXTRACT_FINISHED")
 RECIPE_IMPORT_FINISHED = format_message(200, "RECIPE_IMPORT_FINISHED")
 CRAFT_PREPARE = format_message(201, "CRAFT_PREPARE")

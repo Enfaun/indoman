@@ -1,3 +1,4 @@
+from fnmatch import filter as fnfilter
 from os import listdir, removedirs
 from os.path import isdir, isfile, join as path_join
 
@@ -12,8 +13,9 @@ def get_recipe(name) -> str:
         return format_error(errors.NO_SUCH_RECIPE)
 
 
-def list_recipes() -> list:
-    [d for d in listdir(constants.RECIPES_DIR) if isdir(d)].sort()
+def list_recipes(glob="*") -> list:
+    recipes = fnfilter(listdir(constants.RECIPES_DIR), glob)
+    return recipes
 
 
 def remove_recipe(name: str):

@@ -1,7 +1,7 @@
 from json import load as json_load, loads as json_loads, dumps as json_dumps, JSONDecodeError
-from os import mkdir, listdir, removedirs
+from os import mkdir, removedirs
 from os.path import isdir, join as path_join, isfile
-from shutil import move
+from shutil import rmtree
 from zipfile import ZipFile
 
 from docker.models.containers import Container
@@ -49,6 +49,7 @@ def fail_cleanup(network, containers, directory):
         network.remove()
     for container in containers:
         container.remove()
+    rmtree(directory)
     removedirs(directory)
 
 

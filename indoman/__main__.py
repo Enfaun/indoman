@@ -29,7 +29,7 @@ if __name__ == "__main__":
                         help="Show debug log",
                         action="store_true")
     parser.add_argument("--socketio-debug",
-                        help="Show socketio debug log",
+                        help="Show socket.io debug log",
                         action="store_true")
     parser.add_argument("--host",
                         help="Host to listen on",
