@@ -70,11 +70,15 @@ class Recipes(Namespace):
                 container = craft_recipe.create_container(container_recipe, recipe_name, prefix, variables, env)
                 created_containers.append(container)
                 default_alias = f"{prefix}_{recipe_name}_{container_recipe['name']}"
-                alias = container_recipe.get("network_alias", default=default_alias)
-                network.connect(container, [alias, ])
+                alias = container_recipe.get("network_alias")
+                if not alias:
+                    alias = default_alias
+                network.connect(container, aliases=[alias, ])
                 message = messages.CRAFT_CONTAINER_CREATED
                 message.update({"container": container.name})
                 self.send(message, room)
+            for container in created_containers:
+                container.start()
             self.send(messages.SUCCESS, room)
         except JSONDecodeError:
             logging.logger.error(format_exc())
@@ -82,9 +86,10 @@ class Recipes(Namespace):
         except Exception as e:
             logging.logger.error(format_exc())
             self.send(format_error(e))
-            craft_recipe.fail_cleanup(network, created_containers, recipe_path)
+            craft_recipe.fail_cleanup(network, created_containers, result_prefix_dir)
         finally:
             self.leave_room(sid, room)
+        self.leave_room(sid, room)
 
     def on_get_recipe(self, sid, name):
         return get_recipe(name)

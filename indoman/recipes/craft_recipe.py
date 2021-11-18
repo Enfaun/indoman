@@ -1,3 +1,4 @@
+import logging
 from json import load as json_load, loads as json_loads, dumps as json_dumps, JSONDecodeError
 from os import mkdir, removedirs
 from os.path import isdir, join as path_join, isfile
@@ -6,7 +7,7 @@ from zipfile import ZipFile
 
 from docker.models.containers import Container
 from docker.models.networks import Network
-from indoman.utils import errors, constants, docker
+from indoman.utils import errors, constants, docker, logging
 
 
 def load_check_recipe(recipe_path, variables, environment_variables):
@@ -23,21 +24,28 @@ def load_check_recipe(recipe_path, variables, environment_variables):
         if "environment_variables" in container:
             for env in container["environment_variables"]:
                 if env.get("required") == True:  # same as above
-                    if not env["key"] in environment_variables:
+                    if not env["key"] in environment_variables[container["name"]]:
                         raise errors.MISSING_VARIABLE
+    return recipe
 
 
 def replace_variables(recipe, variables, result_prefix_dir):
     recipe_str = json_dumps(recipe)
-    for key, value in variables.item():
+    logging.logger.debug(recipe)
+    logging.logger.debug(recipe_str)
+    for key, value in variables.items():
+        logging.logger.debug(f"Replacing %{key}% to {value}")
         recipe_str = recipe_str.replace(f"%{key}%", str(value))
-    recipe_str = recipe_str.replace(f"%CRAFTED_PREFIX_DIR%", result_prefix_dir)
+        logging.logger.debug(recipe_str)
+    recipe_str = recipe_str.replace("%CRAFTED_PREFIX_DIR%", result_prefix_dir)
     recipe = json_loads(recipe_str)
     return recipe
 
 
 def prepare_artifact_directory(recipe_name, prefix):
     result_prefix_dir = path_join(constants.CRAFTED_PREFIX_DIR, f"{prefix}_{recipe_name}")
+    if not isdir(constants.CRAFTED_PREFIX_DIR):
+        mkdir(constants.CRAFTED_PREFIX_DIR)
     if isdir(result_prefix_dir):
         raise FileExistsError
     mkdir(result_prefix_dir)
@@ -50,7 +58,6 @@ def fail_cleanup(network, containers, directory):
     for container in containers:
         container.remove()
     rmtree(directory)
-    removedirs(directory)
 
 
 
@@ -66,8 +73,13 @@ def create_container(container_recipe, main_recipe_name, prefix, variables, envi
     kwargs = {}
     ports = container_recipe.get("ports")
     if ports:
+        port_args = {}
         for container_port, host in ports.items():
             host_interface, host_port = host.split(":")
-            kwargs.update({container_port: (host_interface, host_port, )})
-    container = docker.client.containers.create(image_name, detach=True, environment=environment_variables, **kwargs)
+            port_args.update({container_port: (host_interface, host_port, )})
+        kwargs.update({"ports": port_args})
+    container = docker.client.containers.create(image_name,
+                                                name=container_name,
+                                                detach=True,
+                                                environment=environment_variables, **kwargs)
     return container

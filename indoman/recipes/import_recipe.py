@@ -13,7 +13,6 @@ def unpack_zip(zip_filename):
     tmp_dir = path_join(constants.TEMP_DIR, f"{zip_filename}-extracted")
     if isdir(tmp_dir):
         rmtree(tmp_dir)
-        removedirs(tmp_dir)
     mkdir(tmp_dir)
     zipfile.extractall(tmp_dir)
     if isfile(path_join(tmp_dir, "recipe.json")):
@@ -38,10 +37,11 @@ def parse_recipe(directory):
         if not name_re.match(name):
             raise errors.INCORRECT_RECIPE_JSON_FORMAT
         new_recipe_path = path_join(constants.RECIPES_DIR, name)
+        if isdir(new_recipe_path):
+            rmtree(new_recipe_path)
         move(directory, new_recipe_path + "/")
     except (JSONDecodeError, KeyError):
         rmtree(directory)
-        removedirs(directory)
         raise errors.INCORRECT_RECIPE_JSON_FORMAT
     finally:
         recipefp.close()
