@@ -1,4 +1,5 @@
 from docker.errors import DockerException
+from docker.models.containers import Container
 from socketio import Namespace
 
 from indoman.utils import docker, logging, format_error, messages
@@ -12,14 +13,14 @@ class Containers(Namespace):
 
     def on_list(self, sid, list_params={}):
         try:
-            containers = docker.client.containers.list(**list_params)
+            containers: Container = docker.client.containers.list(**list_params)
             return [c.attrs for c in containers]
         except DockerException as ex:
             return format_error(ex)
 
     def on_list_stats(self, sid):
         try:
-            containers = docker.client.containers.list(all=True)
+            containers: Container = docker.client.containers.list(all=True)
             return {container.id: container.stats(stream=False) for container in containers}
         except DockerException as ex:
             return format_error(ex)
@@ -44,17 +45,24 @@ class Containers(Namespace):
         except DockerException as ex:
             return format_error(ex)
 
+    def on_remove(self, sid, container_id, stop_params={}):
+        try:
+            container: Container = docker.client.containers.get(container_id)
+            container.remove()
+        except DockerException as ex:
+            return format_error(ex)
+
     def on_logs(self, sid, container_id, log_params={}):
 
         try:
-            container = docker.client.containers.get(container_id)
+            container: Container  = docker.client.containers.get(container_id)
             return container.logs(**log_params)
         except DockerException as ex:
             return format_error(ex)
 
     def on_stop_listen_logs(self, sid, container_id):
         try:
-            container = docker.client.containers.get(container_id)
+            container: Container  = docker.client.containers.get(container_id)
             room = f"{sid}-{container.id}-log"
             if room in self.rooms(sid):
                 self.leave_room(sid, room)
@@ -63,7 +71,7 @@ class Containers(Namespace):
 
     def on_listen_logs(self, sid, container_id, log_params={}):
         try:
-            container = docker.client.containers.get(container_id)
+            container: Container  = docker.client.containers.get(container_id)
             room = f"{sid}-{container.id}-log"
             self.enter_room(sid, room)
             stream = container.logs(stream=True, follow=True, **log_params)
