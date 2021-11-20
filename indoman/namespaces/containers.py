@@ -52,6 +52,15 @@ class Containers(Namespace):
         except DockerException as ex:
             return format_error(ex)
 
+    def on_stop_listen_logs(self, sid, container_id):
+        try:
+            container = docker.client.containers.get(container_id)
+            room = f"{sid}-{container.id}-log"
+            if room in self.rooms(sid):
+                self.leave_room(sid, room)
+        except DockerException as ex:
+            return format_error(ex)
+
     def on_listen_logs(self, sid, container_id, log_params={}):
         try:
             container = docker.client.containers.get(container_id)
