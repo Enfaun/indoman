@@ -47,7 +47,7 @@ def prepare_artifact_directory(recipe_name, prefix):
     if not isdir(constants.CRAFTED_PREFIX_DIR):
         mkdir(constants.CRAFTED_PREFIX_DIR)
     if isdir(result_prefix_dir):
-        raise FileExistsError
+        rmtree(result_prefix_dir)
     mkdir(result_prefix_dir)
     return result_prefix_dir
 
@@ -58,7 +58,6 @@ def fail_cleanup(network, containers, directory):
     for container in containers:
         container.remove()
     rmtree(directory)
-
 
 
 def create_network(recipe_name, prefix) -> Network:
