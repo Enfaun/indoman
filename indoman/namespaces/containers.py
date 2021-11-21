@@ -79,12 +79,10 @@ class Containers(Namespace):
             try:
                 while True:
                     char = next(stream).decode("utf-8")
-                    if char != "\r" and char != "\n":
-                        line += char
-                    else:
-                        if line != "":
-                            self.emit("logs", line, room)
-                            line = ""
+                    line += char
+                    if char == "\n":
+                        self.emit("logs", line, room)
+                        line = ""
                     if room not in self.rooms(sid):
                         break
             except StopIteration:

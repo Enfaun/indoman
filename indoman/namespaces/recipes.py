@@ -1,9 +1,9 @@
-from json import load as json_load, loads as json_loads, dumps as json_dumps, JSONDecodeError
-from os import mkdir, listdir, removedirs
-from os.path import isdir, join as path_join, isfile
-from shutil import move
+from json import JSONDecodeError
+from os import mkdir
+from os.path import isdir, join as path_join
+from re import compile as re_compile
 from traceback import format_exc
-from zipfile import ZipFile, BadZipfile
+from zipfile import BadZipfile
 
 from docker.errors import ImageNotFound
 from socketio import Namespace
@@ -45,6 +45,10 @@ class Recipes(Namespace):
             self.leave_room(sid, room)
 
     def on_craft(self, sid, recipe_name, prefix, variables, environment_variables):
+        prefix_re = re_compile("[a-z_]+")
+        if not prefix_re.fullmatch(prefix):
+            self.send(format_error(errors.BAD_PREFIX_NAME))
+            return
         room = f"{sid}=craft-{prefix}_{recipe_name}"
         self.enter_room(sid, room)
         recipe_path = path_join(constants.RECIPES_DIR, recipe_name, "recipe.json")
