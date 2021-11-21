@@ -55,7 +55,7 @@ class Containers(Namespace):
     def on_logs(self, sid, container_id, log_params={}):
 
         try:
-            container: Container  = docker.client.containers.get(container_id)
+            container: Container = docker.client.containers.get(container_id)
             return container.logs(**log_params)
         except DockerException as ex:
             return format_error(ex)
@@ -75,13 +75,20 @@ class Containers(Namespace):
             room = f"{sid}-{container.id}-log"
             self.enter_room(sid, room)
             stream = container.logs(stream=True, follow=True, **log_params)
+            line = ""
             try:
                 while True:
-                    line = next(stream).decode("utf-8")
-                    self.emit("logs", line, room)
+                    char = next(stream).decode("utf-8")
+                    if char != "\r" and char != "\n":
+                        line += char
+                    else:
+                        if line != "":
+                            self.emit("logs", line, room)
+                            line = ""
                     if room not in self.rooms(sid):
                         break
             except StopIteration:
+                self.emit("logs", line, room)
                 self.leave_room(sid, room)
         except DockerException as ex:
             return format_error(ex)
