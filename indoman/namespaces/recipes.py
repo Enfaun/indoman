@@ -37,7 +37,7 @@ class Recipes(Namespace):
             self.send(messages.RECIPE_IMPORT_FINISHED, room)
         except BadZipfile:
             logging.logger.error(format_exc())
-            self.send(errors.BAD_ZIPFILE, room)
+            self.send(format_error(errors.BAD_ZIPFILE), room)
         except Exception as e:
             logging.logger.error(format_exc())
             self.send(format_error(e))
