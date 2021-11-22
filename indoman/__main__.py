@@ -35,7 +35,7 @@ if __name__ == "__main__":
     parser.add_argument("--host",
                         help="Host to listen on",
                         type=str,
-                        default="127.0.0.1")
+                        default="0.0.0.0")
     parser.add_argument("--port",
                         help="Port to listen on",
                         type=int,
