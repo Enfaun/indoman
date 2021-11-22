@@ -3,14 +3,15 @@ from argparse import ArgumentParser
 import eventlet
 from socketio import Server, WSGIApp
 
-from indoman import namespaces, app_name
 from indoman.utils import docker, logging, populate_namespace
 
 logging.init()
 docker.init()
 
-
-print(__name__)
+static_files = {
+    "/": "./frontend/index.html",
+    "": "./frontend"
+}
 if __name__ == "__main__":
     parser = ArgumentParser(
         "indoman",
@@ -40,7 +41,7 @@ if __name__ == "__main__":
                         type=int,
                         default="4636")
     args = parser.parse_args()
-    server_init_args =  {}
+    server_init_args = {}
     if args.disable_cors:
         server_init_args.update({"cors_allowed_origins": "*"})
     if args.debug:
@@ -51,10 +52,10 @@ if __name__ == "__main__":
     sio = Server(**server_init_args)
     logging.logger.debug("Populating namespaces...")
     populate_namespace(sio)
-    app = WSGIApp(sio)
+    app = WSGIApp(sio, static_files=static_files)
     logging.logger.info("Starting up indoman...")
     eventlet.wsgi.server(eventlet.listen((args.host, args.port)), app)
 else:
     sio = Server()
     populate_namespace(sio)
-    app = WSGIApp(sio)
+    app = WSGIApp(sio, static_files=static_files)
