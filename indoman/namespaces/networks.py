@@ -26,7 +26,7 @@ class Networks(Namespace):
         except DockerException as ex:
             return format_error(ex)
 
-    def on_connect(self, sid, container_id, network_id, connect_params={}):
+    def on_container_connect(self, sid, container_id, network_id, connect_params={}):
         try:
             network: Network = docker.client.networks.get(network_id)
             container: Container = docker.client.containers.get(container_id)
@@ -34,7 +34,7 @@ class Networks(Namespace):
         except DockerException as ex:
             return format_error(ex)
 
-    def on_disonnect(self, sid, container_id, network_id):
+    def on_container_disonnect(self, sid, container_id, network_id):
         try:
             network: Network = docker.client.networks.get(network_id)
             container: Container = docker.client.containers.get(container_id)
