@@ -5,7 +5,7 @@ from re import  compile as re_compile
 from shutil import move, rmtree
 from zipfile import ZipFile
 
-from indoman.utils import errors, constants
+from indoman.utils import errors, constants, docker, logging
 
 
 def unpack_zip(zip_filename):
@@ -37,6 +37,15 @@ def parse_recipe(directory):
         if not name_re.match(name):
             raise errors.INCORRECT_RECIPE_JSON_FORMAT
         new_recipe_path = path_join(constants.RECIPES_DIR, name)
+        images_path = path_join(directory, "images")
+        if isdir(images_path):
+            images = listdir(path_join(directory, "images"))
+            for image in images:
+                logging.logger.info(f"Importing image {image}")
+                image_path = path_join(directory, "images", image)
+                image_fp = open(image_path)
+                docker.client.images.load(image_fp)
+                image_fp.close()
         if isdir(new_recipe_path):
             rmtree(new_recipe_path)
         move(directory, new_recipe_path + "/")
