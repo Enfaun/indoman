@@ -45,10 +45,10 @@ class Containers(Namespace):
         except DockerException as ex:
             return format_error(ex)
 
-    def on_remove(self, sid, container_id):
+    def on_remove(self, sid, container_id, remove_params={}):
         try:
             container: Container = docker.client.containers.get(container_id)
-            container.remove()
+            container.remove(**remove_params)
         except DockerException as ex:
             return format_error(ex)
 
